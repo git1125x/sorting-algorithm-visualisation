@@ -21,31 +21,6 @@
 #define X2_BORDER SCREEN_WIDTH * 2 / 3 - 20
 #define Y2_BORDER SCREEN_HEIGHT - 20
 
-class Button
-{
-private:
-    Vector2 pos_;
-    Vector2 size_;
-    bool buttonPressed;
-
-public:
-    Button(Vector2 pos, Vector2 size) : pos_(pos), size_(size), buttonPressed(false) { ; }
-    void pressButton()
-    {
-        buttonPressed = !buttonPressed;
-    }
-    void draw()
-    {
-        if (buttonPressed)
-        {
-            DrawRectangleV(pos_, size_, DARKGRAY);
-        }
-        else
-        {
-            DrawRectangleV(pos_, size_, BLACK);
-        }
-    }
-};
 
 void drawBorder()
 {
@@ -185,7 +160,6 @@ void visualize(std::vector<std::pair<int, Color>> &numbers, std::atomic_bool &ru
         // BEGIN: Draw Objects
         drawBorder();
         drawBars(numbers);
-        // button.draw();
         //  END: Draw Objects
         EndDrawing();
         WaitTime(TIME_DELTA);
@@ -221,9 +195,6 @@ int main(void)
     const int y2 = SCREEN_HEIGHT - 20;
     int size = 10;
     std::vector<std::pair<int, Color>> numbers = generateNumbers(size);
-    Vector2 button_pos{SCREEN_WIDTH - 200, 100};
-    Vector2 button_size{130, 40};
-    Button button(button_pos, button_size);
 
     std::atomic_bool start_sorting(false);
     std::atomic_bool sorted(true);
