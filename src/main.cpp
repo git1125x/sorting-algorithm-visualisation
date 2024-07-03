@@ -56,15 +56,15 @@ void drawBorder()
     DrawLine(X1_BORDER, Y2_BORDER, X1_BORDER, Y1_BORDER, col);
 }
 
-bool numInNums(int num, std::vector<int> nums)
+bool numInNums(int num, std::vector<std::pair<int, Color>> numbers)
 {
-    if (nums.size() == 0)
+    if (numbers.size() == 0)
     {
         return false;
     }
-    for (int i = 0; i < nums.size(); ++i)
+    for (int i = 0; i < numbers.size(); ++i)
     {
-        if (num == nums[i])
+        if (num == numbers[i].first)
         {
             return true;
         }
@@ -72,7 +72,7 @@ bool numInNums(int num, std::vector<int> nums)
     return false;
 }
 
-void drawBars(std::vector<int> numbers)
+void drawBars(std::vector<std::pair<int, Color>> numbers)
 {
     int x1 = X1_BORDER;
     int y1 = Y1_BORDER;
@@ -87,35 +87,36 @@ void drawBars(std::vector<int> numbers)
     float min_bar_hight = (height - 2 * offset) / size;
     for (int i = 0; i < numbers.size(); ++i)
     {
-        float bar_height = numbers[i] * min_bar_hight;
+        float bar_height = numbers[i].first * min_bar_hight;
         Vector2 position;
         Vector2 size;
         size.x = bar_width;
         size.y = bar_height;
         position.x = (float)x1 + offset * (i + 1) + i * bar_width;
         position.y = (float)y2 - bar_height;
-        Color color = BLACK;
+        Color color = numbers[i].second;
         DrawRectangleV(position, size, color);
     }
 }
 
-void randomizeNumbers(std::vector<int> &numbers)
+void randomizeNumbers(std::vector<std::pair<int, Color>> &numbers)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::shuffle(numbers.begin(), numbers.end(), gen);
 }
 
-std::vector<int> generateNumbers(int size)
+std::vector<std::pair<int, Color>> generateNumbers(int size)
 {
-    std::vector<int> result;
+    std::vector<std::pair<int, Color>> result;
     for (int i = 1; i <= size; ++i)
     {
-        result.emplace_back(i);
+        std::pair<int, Color> tmp = std::make_pair(i, BLACK);
+        result.emplace_back(tmp);
     }
     return result;
 }
-void swapPlaces(std::vector<int> &numbers, int i, int j)
+void swapPlaces(std::vector<std::pair<int, Color>> &numbers, int i, int j)
 {
     if (i < 0 || j < 0 || i >= numbers.size() || j >= numbers.size())
     {
@@ -123,11 +124,19 @@ void swapPlaces(std::vector<int> &numbers, int i, int j)
     }
     else
     {
+        numbers[i].second = RED;
+        numbers[i+1].second = DARKGRAY;
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         std::swap(numbers[i], numbers[j]);
+        numbers[i].second = DARKGRAY;
+        numbers[i+1].second = RED;
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        numbers[i].second = BLACK;
+        numbers[i+1].second = BLACK;
     }
 }
 
-void sort(std::vector<int> &numbers)
+void sort(std::vector<std::pair<int, Color>> &numbers)
 {
     int counter = 1;
     while (counter != 0)
@@ -135,17 +144,16 @@ void sort(std::vector<int> &numbers)
         counter = 0;
         for (int i = 0; i < numbers.size() - 1; ++i)
         {
-            if (numbers[i] > numbers[i + 1])
+            if (numbers[i].first > numbers[i + 1].first)
             {
                 counter++;
                 swapPlaces(numbers, i, i + 1);
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
         }
     }
 }
 
-void visualize(std::vector<int> &numbers, std::atomic_bool &running, std::atomic_bool &start_sorting, std::atomic_bool &sorted)
+void visualize(std::vector<std::pair<int, Color>> &numbers, std::atomic_bool &running, std::atomic_bool &start_sorting, std::atomic_bool &sorted)
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sorting Algorithms");
 
@@ -173,7 +181,7 @@ void visualize(std::vector<int> &numbers, std::atomic_bool &running, std::atomic
         }
 
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(LIGHTGRAY);
         // BEGIN: Draw Objects
         drawBorder();
         drawBars(numbers);
@@ -186,7 +194,7 @@ void visualize(std::vector<int> &numbers, std::atomic_bool &running, std::atomic
     CloseWindow();
 }
 
-void sorting(std::vector<int> &numbers, std::atomic_bool &running, std::atomic_bool &start_sorting, std::atomic_bool &sorted)
+void sorting(std::vector<std::pair<int, Color>> &numbers, std::atomic_bool &running, std::atomic_bool &start_sorting, std::atomic_bool &sorted)
 {
     while (running)
     {
@@ -212,7 +220,7 @@ int main(void)
     const int x2 = SCREEN_WIDTH * 2 / 3 - 20;
     const int y2 = SCREEN_HEIGHT - 20;
     int size = 10;
-    std::vector<int> numbers = generateNumbers(size);
+    std::vector<std::pair<int, Color>> numbers = generateNumbers(size);
     Vector2 button_pos{SCREEN_WIDTH - 200, 100};
     Vector2 button_size{130, 40};
     Button button(button_pos, button_size);
